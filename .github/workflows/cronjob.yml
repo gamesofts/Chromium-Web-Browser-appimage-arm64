@@ -15,7 +15,7 @@ permissions:
 jobs:
   sync-files:
     name: "Run sync"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: "Checkout source repository"
         uses: actions/checkout@v4
