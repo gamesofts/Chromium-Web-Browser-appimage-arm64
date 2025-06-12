@@ -8,7 +8,7 @@ cd ./tmp || exit 1
 
 # DOWNLOAD APPIMAGETOOL
 if ! test -f ./appimagetool; then
-	wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
+	wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-aarch64.AppImage -O appimagetool
 	chmod a+x ./appimagetool
 fi
 
@@ -18,9 +18,9 @@ _create_chromium_appimage() {
 	# DOWNLOAD THE SNAP PACKAGE
 	if ! test -f ./*.snap; then
 		if wget --version | head -1 | grep -q ' 1.'; then
-			wget -q --no-verbose --show-progress --progress=bar "$(curl -H 'Snap-Device-Series: 16' http://api.snapcraft.io/v2/snaps/info/chromium --silent | sed 's/\[{/\n/g; s/},{/\n/g' | grep -i "$CHANNEL" | head -1 | sed 's/[()",{} ]/\n/g' | grep "^http")"
+			wget -q --no-verbose --show-progress --progress=bar "$(curl -H 'Snap-Device-Series: 16' http://api.snapcraft.io/v2/snaps/info/chromium --silent | sed 's/\[{/\n/g; s/},{/\n/g' | grep -i "$CHANNEL" | grep arm64  | head -1 | sed 's/[()",{} ]/\n/g' | grep "^http")"
 		else
-			wget "$(curl -H 'Snap-Device-Series: 16' http://api.snapcraft.io/v2/snaps/info/chromium --silent | sed 's/\[{/\n/g; s/},{/\n/g' | grep -i "$CHANNEL" | head -1 | sed 's/[()",{} ]/\n/g' | grep "^http")"
+			wget "$(curl -H 'Snap-Device-Series: 16' http://api.snapcraft.io/v2/snaps/info/chromium --silent | sed 's/\[{/\n/g; s/},{/\n/g' | grep -i "$CHANNEL" | grep arm64  | head -1 | sed 's/[()",{} ]/\n/g' | grep "^http")"
 		fi
 	fi
 
@@ -42,9 +42,9 @@ _create_chromium_appimage() {
 	HEREDOC
 	chmod a+x ./"$APP".AppDir/AppRun
 
-	ARCH=x86_64 ./appimagetool --comp zstd --mksquashfs-opt -Xcompression-level --mksquashfs-opt 20 \
-	-u "gh-releases-zsync|$GITHUB_REPOSITORY_OWNER|Chromium-Web-Browser-appimage|continuous|*-$CHANNEL-*x86_64.AppImage.zsync" \
-	./"$APP".AppDir Chromium-"$CHANNEL"-"$VERSION"-x86_64.AppImage || exit 1
+	ARCH=aarch64 ./appimagetool --comp zstd --mksquashfs-opt -Xcompression-level --mksquashfs-opt 20 \
+	-u "gh-releases-zsync|$GITHUB_REPOSITORY_OWNER|Chromium-Web-Browser-appimage|continuous|*-$CHANNEL-*aarch64.AppImage.zsync" \
+	./"$APP".AppDir Chromium-"$CHANNEL"-"$VERSION"-aarch64.AppImage || exit 1
 }
 
 CHANNEL="stable"
