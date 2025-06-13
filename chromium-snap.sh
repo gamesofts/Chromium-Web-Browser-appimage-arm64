@@ -42,7 +42,7 @@ _create_chromium_appimage() {
 	HEREDOC
 	chmod a+x ./"$APP".AppDir/AppRun
 
-	ARCH=aarch64 ./appimagetool \
+	ARCH=aarch64 ./appimagetool -s deploy \
 	-u "gh-releases-zsync|$GITHUB_REPOSITORY_OWNER|Chromium-Web-Browser-appimage|continuous|*-$CHANNEL-*aarch64.AppImage.zsync" \
 	./"$APP".AppDir Chromium-"$CHANNEL"-"$VERSION"-aarch64.AppImage || exit 1
 }
