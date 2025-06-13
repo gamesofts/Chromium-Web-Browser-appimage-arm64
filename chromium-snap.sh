@@ -32,6 +32,10 @@ _create_chromium_appimage() {
 	mv ./squashfs-root/usr/lib/chromium*/* ./"$APP".AppDir/
 	mv ./squashfs-root/*.png ./"$APP".AppDir/
 	mv ./squashfs-root/bin/*"$APP"*.desktop ./"$APP".AppDir/
+	if test -d ./squashfs-root/etc; then cp -r ./squashfs-root/etc ./"$APP".AppDir/; fi
+	if test -d ./squashfs-root/lib; then cp -r ./squashfs-root/lib* ./"$APP".AppDir/; fi
+	if test -d ./squashfs-root/usr; then cp -r ./squashfs-root/usr ./"$APP".AppDir/; fi
+
 	sed -i 's#/chromium.png#chromium#g' ./"$APP".AppDir/*.desktop
 
 	cat <<-'HEREDOC' >> ./"$APP".AppDir/AppRun
@@ -42,7 +46,17 @@ _create_chromium_appimage() {
 	HEREDOC
 	chmod a+x ./"$APP".AppDir/AppRun
 
-	ARCH=aarch64 ./appimagetool -s deploy \
+	export UNION_PRELOAD=/:"${HERE}"
+	export LD_LIBRARY_PATH="${HERE}"/usr/lib/:"${HERE}"/usr/lib/i386-linux-gnu/:"${HERE}"/usr/lib/x86_64-linux-gnu/:"${HERE}"/usr/lib/aarch64-linux-gnu/:"${HERE}"/lib/:"${HERE}"/lib/i386-linux-gnu/:"${HERE}"/lib/x86_64-linux-gnu/:"${HERE}"/lib/aarch64-linux-gnu/:"${LD_LIBRARY_PATH}"
+	export PATH="${HERE}"/usr/bin/:"${HERE}"/usr/sbin/:"${HERE}"/usr/games/:"${HERE}"/bin/:"${HERE}"/sbin/:"${PATH}"
+	export PYTHONPATH="${HERE}"/usr/share/pyshared/:"${HERE}"/usr/lib/python*/:"${PYTHONPATH}"
+	export PYTHONHOME="${HERE}"/usr/:"${HERE}"/usr/lib/python*/
+	export XDG_DATA_DIRS="${HERE}"/usr/share/:"${XDG_DATA_DIRS}"
+	export PERLLIB="${HERE}"/usr/share/perl5/:"${HERE}"/usr/lib/perl5/:"${PERLLIB}"
+	export GSETTINGS_SCHEMA_DIR="${HERE}"/usr/share/glib-2.0/schemas/:"${GSETTINGS_SCHEMA_DIR}"
+	export QT_PLUGIN_PATH="${HERE}"/usr/lib/qt4/plugins/:"${HERE}"/usr/lib/i386-linux-gnu/qt4/plugins/:"${HERE}"/usr/lib/x86_64-linux-gnu/qt4/plugins/:"${HERE}"/usr/lib/aarch-linux-gnu/qt4/plugins/:"${HERE}"/usr/lib32/qt4/plugins/:"${HERE}"/usr/lib64/qt4/plugins/:"${HERE}"/usr/lib/qt5/plugins/:"${HERE}"/usr/lib/i386-linux-gnu/qt5/plugins/:"${HERE}"/usr/lib/x86_64-linux-gnu/qt5/plugins/:"${HERE}"/usr/lib/aarch-linux-gnu/qt5/plugins/:"${HERE}"/usr/lib32/qt5/plugins/:"${HERE}"/usr/lib64/qt5/plugins/:"${QT_PLUGIN_PATH}"
+
+	ARCH=aarch64 ./appimagetool --comp zstd --mksquashfs-opt -Xcompression-level --mksquashfs-opt 20 \
 	-u "gh-releases-zsync|$GITHUB_REPOSITORY_OWNER|Chromium-Web-Browser-appimage|continuous|*-$CHANNEL-*aarch64.AppImage.zsync" \
 	./"$APP".AppDir Chromium-"$CHANNEL"-"$VERSION"-aarch64.AppImage || exit 1
 }
